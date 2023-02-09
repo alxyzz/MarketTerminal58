@@ -1,8 +1,10 @@
-﻿using System;
+﻿using RK_ConsoleGame.Screens;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Timers;
+using System.Windows.Forms;
 
 namespace RK_game_2023
 {/// <summary>
@@ -11,36 +13,19 @@ namespace RK_game_2023
     class Game
     {
         #region vars
-        public enum ScreenState
-        {
-            Mine, //This screen should allow the player to choose which subtree they want to follow. To leave, get help, etc.
-            Map, //This screen should allow the player to move around the graph world map by inputting a number associated to a certain neighboring graph node. the weight of the edge is the cost of passage
-            Menu, //allow the player to exit, select enter game, or get help
-            Help, //explain the game a bit
-            Crypto //accessible during Mine or Map, allows player to exchange cryptos for MUD (Mongolian Uranium-Dollars)
-        }
+       
 
-        struct ScreenStructure
-        {
-            string title;
-
-            string bottom;
-
-            public ScreenStructure(string t, string b)
-            {
-                title = t; bottom = b;
-            }
-        }
-
+       
 
         
 
+       
         
 
         private bool playing;
-        private Timer periodicAction;
+        private System.Timers.Timer periodicAction;
         private int timerInterval = 2000;
-        private ScreenState _currentScreenState = ScreenState.Menu;
+        private GameState _currentScreenState = GameState.Menu;
         #endregion
 
         #region Display Variables
@@ -54,19 +39,22 @@ namespace RK_game_2023
         private string blurb_Crypto = "Crypto" + Environment.NewLine + "Exchange those trashcoins for some !real! MUD.";
 
         //tips. indicators for what the player can currently do, that appear at the bottom of the screen.
-        //private string tip_Menu = "Keys:" + Environment.NewLine + "Here you may choose to play, get some help, or quit.";
+        private string tip_Menu = "Keys:" + Environment.NewLine + "Here you may choose to play, get some help, or quit.";
         private string tip_Mine = "Keys:" + Environment.NewLine + "Wealth awaits...";
         private string tip_Map = "Keys:" + Environment.NewLine + "Travel the cryptosphere.";
-      //  private string tip_Help = "Keys:" + Environment.NewLine + "Here you may choose to play, get some help, or quit.";
         private string tip_Crypto = "Keys:" + Environment.NewLine + "[B]ack, [P]urchase, [U]p, [D]own." + Environment.NewLine + "Sort: [A]lphanumeric, [V]alue, Asc[e]nding, Desce[n]ding";
 
         //private void misc_Help = ""
+
+
+
 
 
         #endregion
 
         #region Components
         private InputManager input; //handles most text based commands
+        public Form1 gameForm;
         #endregion
 
         #region Setup & Logic
@@ -85,7 +73,7 @@ namespace RK_game_2023
         }
         private void InitializeComponents()
         {
-
+            input = new InputManager();
         }
         /// <summary>
         /// sets up the Console window properly.
@@ -114,6 +102,10 @@ namespace RK_game_2023
             Render_Bottom();
            
         }
+        string currTitle;
+        string currBottomText;
+
+
 
 
         private void Render_Title()
@@ -121,46 +113,80 @@ namespace RK_game_2023
             string title = "";
             switch (_currentScreenState)
             {
-                case ScreenState.Menu:
+                case GameState.Menu:
                     title = blurb_Menu;
 
                     break;
-                case ScreenState.Map:
+                case GameState.Map:
                     title = blurb_Map;
 
                     break;
-                case ScreenState.Mine:
+                case GameState.Mine:
                     title = blurb_Mine;
 
                     break;
-                case ScreenState.Crypto:
+                case GameState.Crypto:
                     title = blurb_Crypto;
 
                     break;
-                case ScreenState.Help:
+                case GameState.Help:
                     title = blurb_Help;
 
                     break;
             }
-            Console.WriteLine(title);
+            currTitle = title;
         }
-        private void Render_Content()
-        {
-
-        }
+        
         private void Render_Bottom()
         {
+            string title = "";
+            switch (_currentScreenState)
+            {
+                case GameState.Menu:
+                    title = tip_Menu;
 
+                    break;
+                case GameState.Map:
+                    title = blurb_Map;
+
+                    break;
+                case GameState.Mine:
+                    title = blurb_Mine;
+
+                    break;
+                case GameState.Crypto:
+                    title = blurb_Crypto;
+
+                    break;
+                case GameState.Help:
+                    title = blurb_Help;
+
+                    break;
+            }
+            currBottomText = title;
         }
         #endregion
 
         #region Timer
-       
 
-        private static void OnTimedEvent(Object source, ElapsedEventArgs e)
+        static int i;
+        private void OnTimedEvent(Object source, ElapsedEventArgs e)
         {
+            i = i * 2;
+            List<string> a = new List<string>();
+            for (int b = 0; b < 12; b++)
+            {
+                a.Add("Entry " + b + " - [" + i + "]");
+            }
+
             Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}",
                 e.SignalTime);
+
+            gameForm.UpdateCryptoInventory(a);
+
+
+
+
         }
 
         private void SetupTimer()
