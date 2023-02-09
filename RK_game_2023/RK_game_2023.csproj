@@ -46,20 +46,28 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataStorage.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Game.cs" />
+    <Compile Include="InputManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Scripts\DataStructures\GraphNode.cs" />
-    <Compile Include="Scripts\DataStorage.cs" />
-    <Compile Include="Scripts\DataStructures\GraphVertex.cs" />
+    <Compile Include="Screens\CryptoScene.cs" />
+    <Compile Include="Screens\HelpScene.cs" />
+    <Compile Include="Screens\MapScene.cs" />
+    <Compile Include="Screens\MenuScene.cs" />
+    <Compile Include="Screens\MineScene.cs" />
+    <Compile Include="Screens\Scene.cs" />
+    <Compile Include="Scripts\Currency.cs" />
+    <Compile Include="Scripts\GraphVertex.cs" />
     <Compile Include="Scripts\graph_MapGenerator.cs" />
     <Compile Include="Scripts\list_sortable_CryptoHandler.cs" />
-    <Compile Include="Scripts\DataStructures\TreeNode.cs" />
+    <Compile Include="DataStructures\TreeNode.cs" />
     <Compile Include="Scripts\tree_ShaftGenerator.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>

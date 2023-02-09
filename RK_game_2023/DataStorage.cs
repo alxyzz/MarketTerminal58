@@ -6,32 +6,8 @@ using System.Threading.Tasks;
 
 namespace RK_game_2023
 {
-    class list_sortable_CryptoHandler
+    static class DataStorage
     {
 
-
-
-
-
-
-
-
-
-
-
-
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

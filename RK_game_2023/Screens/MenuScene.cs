@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RK_game_2023
+namespace RK_ConsoleGame.Screens
 {
-    class list_sortable_CryptoHandler
+    class MenuScene
     {
 
 
@@ -15,23 +15,5 @@ namespace RK_game_2023
 
 
 
-
-
-
-
-
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

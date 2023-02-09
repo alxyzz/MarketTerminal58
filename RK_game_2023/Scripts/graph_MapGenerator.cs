@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RK_game_2023.Scripts
+namespace RK_game_2023
 {
     class graph_MapGenerator
     {
