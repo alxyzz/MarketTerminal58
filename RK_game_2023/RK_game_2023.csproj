@@ -64,7 +64,7 @@
     <Compile Include="Screens\MineScene.cs" />
     <Compile Include="Screens\Scene.cs" />
     <Compile Include="Scripts\Currency.cs" />
-    <Compile Include="Scripts\GraphVertex.cs" />
+    <Compile Include="DataStructures\GraphVertex.cs" />
     <Compile Include="Scripts\graph_MapGenerator.cs" />
     <Compile Include="Scripts\list_sortable_CryptoHandler.cs" />
     <Compile Include="DataStructures\TreeNode.cs" />
