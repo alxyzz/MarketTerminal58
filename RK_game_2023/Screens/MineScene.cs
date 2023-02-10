@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RK_game_2023.Scripts
+namespace RK_ConsoleGame.Screens
 {
-    class tree_ShaftGenerator
+    class MineScene
     {
     }
 }

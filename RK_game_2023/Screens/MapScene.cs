@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RK_game_2023.Scripts.DataStructures
+namespace RK_ConsoleGame.Screens
 {
-    class GraphVertex
+    class MapScene
     {
     }
 }
