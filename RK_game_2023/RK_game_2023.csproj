@@ -46,17 +46,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataStorage.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="Game.cs" />
-    <Compile Include="InputManager.cs" />
+    <Compile Include="Scripts\Game.cs" />
+    <Compile Include="Scripts\HelperMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Resource1.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resource1.resx</DependentUpon>
+    </Compile>
     <Compile Include="Screens\CryptoScene.cs" />
     <Compile Include="Screens\HelpScene.cs" />
     <Compile Include="Screens\MapScene.cs" />
@@ -69,12 +73,6 @@
     <Compile Include="Scripts\list_sortable_CryptoHandler.cs" />
     <Compile Include="DataStructures\Tree.cs" />
     <Compile Include="Scripts\tree_ShaftGenerator.cs" />
-    <Compile Include="UserControl1.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="UserControl1.Designer.cs">
-      <DependentUpon>UserControl1.cs</DependentUpon>
-    </Compile>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -87,8 +85,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="UserControl1.resx">
-      <DependentUpon>UserControl1.cs</DependentUpon>
+    <EmbeddedResource Include="Resource1.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resource1.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -103,6 +102,20 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="Resources\nodeDepleted.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\depletedNode.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\lowNode.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\freshNode.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\unknownNode.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -120,8 +120,25 @@
   <metadata name="backgroundWorker1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
+  <data name="richTextBox1.Text" xml:space="preserve">
+    <value>Welcome to Market Terminal v0.52!
+
+Congratulations on your new acquisition!
+You are now fully able and licensed to mine various cryptocurrencies using our state-of-the-art subspace technology!
+Enjoy our tesseract-based crypto wallet and do not forget to give us a good review on your social media!
+
+The point of the game is to acquire currency in large amounts.
+
+To do so, one may go around the graph-based overmap and secure various cryptomineshafts.
+Each mineshaft is composed of a binary tree where the player can choose to either take the safe way, or the risky one.
+The Cryptocurrency wallet is a linear data structure.
+The market can be sorted alphanumerically, according to value or gain/loss per cycle, ascending or descending.</value>
+  </data>
   <metadata name="imageList1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>181, 17</value>
+  </metadata>
+  <metadata name="timer1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>291, 17</value>
   </metadata>
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>87</value>
