@@ -17,32 +17,41 @@ namespace RK_game_2023
     {
 
 
-        public uint id;
+        public int id;
+     
+
+        private TreeNode root;
+        private TreeNode left;
+        private TreeNode right;
+
+        #region Game Elements
+        public YieldValue yieldQuality = YieldValue.Intact;
+        public float coinLeft;
+        public int luck = 5;
         public Currency primary;
         public Currency secondary;
-
-        public TreeNode root;
-        public TreeNode left;
-        public TreeNode right;
-        public YieldValue yieldQuality;
-        public float coinLeft;
-        #region Game Elements
-
-        private float yield = 0;
-        private int luck = 0;
-        
-
-
+        public float yield = 0;
+        private float origYield;
         #endregion
 
 
 
 
 
-#region Properties
+        #region Properties
         public YieldValue GetValue()
         {
-            return yieldQuality;
+            if (yield < (origYield / 5))
+            {
+                return YieldValue.Depleted;
+            }
+            if (yield < (origYield/2))
+            {
+                return YieldValue.Low;
+            }
+           
+           
+           else return YieldValue.Intact;
         }
 
         public TreeNode Root
@@ -72,14 +81,14 @@ namespace RK_game_2023
         /// </summary>
         /// <param name="r"></param>
         /// <returns>currency type, amount, rough estimation of yield left, wether we got lucky</returns>
-        public Tuple<Currency, float, YieldValue, bool> Mine(Random r)
+        public Tuple<Currency, float, YieldValue, bool> Mine()
         {
             bool gotLucky = false;
             Currency c;
-            float i = r.Next(1, 101);
+            float i = Scripts.HelperMethods.RandomSeeder.rnd.Next(1, 101);
             coinLeft -= i;
-            i += +r.Next(1, luck); //materializes cryptocurrency from the luckosphere
-            float incomingYield = Scripts.HelperMethods.NextFloat(r, 0, 5);
+            i += Scripts.HelperMethods.RandomSeeder.rnd.Next(1, luck); //materializes cryptocurrency from the luckosphere
+            float incomingYield = Scripts.HelperMethods.NextFloat(Scripts.HelperMethods.RandomSeeder.rnd, 0, 5);
             if (i > 99)
             {
                 incomingYield *= 10;
@@ -96,10 +105,10 @@ namespace RK_game_2023
             {
 
                 case YieldValue.Low:
-                    incomingYield = (incomingYield / 100) * (int)YieldValue.Low; 
+                    incomingYield = (incomingYield / 100) * (int)YieldValue.Low; //25 percent yield
                     break;
                 case YieldValue.Depleted:
-                    incomingYield = (incomingYield / 100) * (int)YieldValue.Depleted;
+                    incomingYield = (incomingYield / 100) * (int)YieldValue.Depleted; //two percent yield. basically done.
                     break;
                 default:
                     break;
@@ -113,51 +122,45 @@ namespace RK_game_2023
         }
 
 
-
-
-
-        private void ReplaceInTree(TreeNode withWhat)
+        public string GetTreeData(string predec = null)
         {
-
-            withWhat.id = id ;
-            withWhat.primary = primary;
-            withWhat.secondary = secondary;
-
-            withWhat.Root = Root;
-            withWhat.Left = Left;
-            withWhat.Right = Right;
-            withWhat.yieldQuality = yieldQuality;
-            withWhat.coinLeft = coinLeft;
+            string msg = "";
+            if (predec != null)
+            {
+                msg = predec;
+            }
+            msg += "Tree - "+this.id + " leads to ";
 
 
-            Left.Root = withWhat;
-            Right.Root = withWhat;
+
+            if (Left != null)
+            {
+                msg += Left.GetTreeData(msg);
+            }
+            if (Right != null)
+            { msg += Right.GetTreeData(msg);
+
+            }
+            return msg;
+        }
+   
+        public TreeNode(/*Currency primC, Currency secC, int iteration, int iterationLimit, float luck,  float luckIncrease, float yieldDecrease */)
+        {
+           
 
 
-          yield = 0;
-         int luck = 0;
         }
 
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="iteration">Iteration</param>
-        /// <param name="startCryptoPotentialQuantityPerNode">the amount of potential coins you can get from the starting node. subsequent node pQ amount is affected by the next parameter</param>
-        /// <param name="potentialQuantityDecreasePerRankPercentage">each node passed through leads to a decrease in pQ</param>
-        /// <param name="potentialQuantityPercentage"></param>
-        /// <param name="luckFactorStart"></param>
-        /// <param name="luckFactorEnd"></param>
-        /// <param name=""></param>
-        /// <returns></returns>
-        public TreeNode(Currency primC, Currency secC, int iteration, int iterationLimit, float luck,  float luckIncrease, float yieldDecrease )
+        public void Generate(Currency primC, Currency secC, int iteration, int iterationLimit, float luck, float luckIncrease, float yieldDecrease)
         {
-            TreeNode startNode = new TreeNode( primC,  secC,iteration,  iterationLimit,  luck,  luckIncrease,  yieldDecrease);
-
+            id = Presets.lastTreeNodeId;
+            Presets.lastTreeNodeId++;
+            //TreeNode startNode = new TreeNode(primC, secC, iteration, iterationLimit, luck, luckIncrease, yieldDecrease);
+            System.Diagnostics.Debug.WriteLine("Generating tree node. Iteration is " + iteration) ;
             yield = Scripts.HelperMethods.RandomSeeder.rnd.Next(300, 500) - (iteration * yieldDecrease);
             primary = primC;
             secondary = secC;
-
+            origYield = yield;
 
             if (iteration >= iterationLimit)
             {
@@ -165,23 +168,22 @@ namespace RK_game_2023
             }
 
             iteration++;
-           
-
-            TreeNode leftNode = new TreeNode(primC, secC, iteration+1, iterationLimit, luck, luckIncrease, yieldDecrease );
-            TreeNode rightNode = new TreeNode(primC, secC, iteration+1, iterationLimit, luck, luckIncrease, yieldDecrease );
-
-            startNode.left = leftNode;
-            startNode.right = rightNode;
 
 
+            TreeNode leftNode = new TreeNode();
+            leftNode.Generate(primC, secC, iteration + 1, iterationLimit, luck, luckIncrease, yieldDecrease);
+
+            TreeNode rightNode = new TreeNode();
+            rightNode.Generate(primC, secC, iteration + 1, iterationLimit, luck, luckIncrease, yieldDecrease);
+
+            left = leftNode;
+            right = rightNode;
 
 
         }
-
-
         #region Algorithms
 
-      
+
 
 
         //PreOrder Traversal of the binary tree. Read self, go left, go right.

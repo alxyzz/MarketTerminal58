@@ -21,7 +21,10 @@ namespace RK_game_2023
         public static int standardLuck = 15;
         public static float currAmt = 10;//amount of currencies generated. outside MUD.
         public static int graphNodeAmount = 5;
-    
+        public static int treeMaxDepth = 5;
+        public static int coinNameLength = 4;
+        public static int lastGraphNodeId;
+        public static int lastTreeNodeId;
     }
 
   public static class GlobalVariables
@@ -47,7 +50,7 @@ namespace RK_game_2023
         private int timerInterval = 2000;
         public GameState _currentScreenState = GameState.Menu;
 
-        public List<GraphNode> nodes;
+        public Graph nodes = new Graph();
         
         #endregion
 
@@ -61,8 +64,8 @@ namespace RK_game_2023
 
         //tips. indicators for what the player can currently do, that appear at the bottom of the screen.
         public string tip_Mine = "Wealth awaits...";
-        public string tip_Map =  "Travel the cryptosphere.";
-        public string tip_Crypto =  "Or, you could invest... \n Select your desired coin via the mouse, then input 'buy' or 'sell' followed by your desired value.";
+        public string tip_Map =  "Tip: Shafts restore after you leave their area. Nature reclaims them - what splendorous beatitude...";
+        public string tip_Crypto =  "Or, you could invest... \n Select your desired coin via the mouse, then input 'buy' or 'sell' followed by your desired value, then press enter.";
 
         //private void misc_Help = ""
 
@@ -75,8 +78,8 @@ namespace RK_game_2023
         #region Components
         public Form1 gameForm;
         
-        public TreeNode currentTreeNode;
         public GraphNode currentGraphNode;
+        public GraphEdge currentlySelectedTravelGraph;
         public Currency currentCurrency;
         #endregion
 
@@ -90,14 +93,47 @@ namespace RK_game_2023
 
         public string GetTreeData()
         {
-            return "";
+            return currentGraphNode.Shaft.GetTreeData();
         }
 
         private void InitializeComponents()
         {
             Wallet.Initialize();
+           
             currentGraphNode = new GraphNode();
-            currentGraphNode.GenerateDirectedGraph(Presets.graphNodeAmount);
+            nodes.addNode(currentGraphNode);
+
+
+
+            GraphNode a1 = new GraphNode();
+            nodes.addNode(a1);
+
+            GraphNode a2 = new GraphNode();
+            nodes.addNode(a2);
+
+            GraphNode a3 = new GraphNode();
+            nodes.addNode(a3);
+
+            GraphNode a4 = new GraphNode();
+            nodes.addNode(a4);
+
+            GraphNode a5 = new GraphNode();
+            nodes.addNode(a5);
+
+
+            nodes.addEdge(currentGraphNode, a5, Scripts.HelperMethods.NextFloat(Scripts.HelperMethods.RandomSeeder.rnd, 800, 1500));
+            nodes.addEdge(currentGraphNode, a2, Scripts.HelperMethods.NextFloat(Scripts.HelperMethods.RandomSeeder.rnd, 800, 1500));
+            nodes.addEdge(currentGraphNode, a4, Scripts.HelperMethods.NextFloat(Scripts.HelperMethods.RandomSeeder.rnd, 800, 1500));
+            nodes.addEdge(a1 , a3, Scripts.HelperMethods.NextFloat(Scripts.HelperMethods.RandomSeeder.rnd, 800, 1500));
+            nodes.addEdge(a3, a2, Scripts.HelperMethods.NextFloat(Scripts.HelperMethods.RandomSeeder.rnd, 800, 1500));
+            nodes.addEdge(a1, a5, Scripts.HelperMethods.NextFloat(Scripts.HelperMethods.RandomSeeder.rnd, 800, 1500));
+            nodes.addEdge(a5, a2, Scripts.HelperMethods.NextFloat(Scripts.HelperMethods.RandomSeeder.rnd, 800, 1500));
+            nodes.addEdge(a2, a4, Scripts.HelperMethods.NextFloat(Scripts.HelperMethods.RandomSeeder.rnd, 800, 1500));
+
+
+
+
+
         }
 
 
@@ -129,46 +165,71 @@ namespace RK_game_2023
 
                 throw new Exception("MoveOnGraphMap @ 134 - Tried to move to an unconnected GraphNode.");
             }
-            currentTreeNode = currentGraphNode.Shaft;
+          
+        }
+
+
+        public void MoveOnTree(bool left)
+        {
+           
+            if (left)
+            {
+                if (currentGraphNode.Shaft.Left != null)
+                {
+                    currentGraphNode.ChangeShaft(currentGraphNode.Shaft.Left); gameForm.UpdateMineDisplay();
+                    return;
+                }
+                
+            }
+            if (currentGraphNode.Shaft.Right != null)
+                currentGraphNode.ChangeShaft(currentGraphNode.Shaft.Right); gameForm.UpdateMineDisplay();
         }
 
         /// <summary>
         /// processes inputs
         /// </summary>
-        public void ProcessInput(string b)
+        public void ProcessInput(float qty, bool buy)
         {
-            if (CheckTransaction(b.ToLower(), true))
+            if (buy)
             {
-
+                float price = qty * currentCurrency.GetValue();
+                if (Wallet.MUD >= price)
+                {
+                    Wallet.Transaction(-price, currentCurrency, qty);
+                }
+                else
+                {
+                    gameForm.ShopInputError("Not enough money.");
+                }
             }
-            else if (CheckTransaction(b.ToLower(), false))
-            {
+            else
+            {//selling
+                float price = qty * currentCurrency.GetValue();
 
+                Wallet.Transaction(price, currentCurrency, -qty);
+                
             }
+                   
+           
            
         }
 
 
 
-        private bool CheckTransaction(string input, bool buy)
+        
+
+        public void GainCurrency(Currency c, float i)
         {
 
-            if (buy)
-            {
+            
+            Wallet.ModifyAmount(c.GetName(), i);
 
-            }
-            else
-            {
-
-            }
 
         }
 
-
-
         public Tuple<Currency, float, YieldValue, bool> GetMineResult()
         {
-            return currentTreeNode.Mine(Scripts.HelperMethods.RandomSeeder.rnd);
+            return currentGraphNode.Shaft.Mine();
         }
        
         #endregion

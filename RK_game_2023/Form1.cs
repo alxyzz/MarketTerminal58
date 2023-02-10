@@ -23,10 +23,9 @@ namespace RK_game_2023
     public partial class Form1 : Form
     {
         List<Panel> panels = new List<Panel>();
-        Game gameref;
+        Game GameData;
         bool mining = false;
         public List<Button> graphTravelButtons;
-        public List<GraphEdge> travelPoints;
         public List<Label> travelCostLabel;
         public Form1()
         {
@@ -42,16 +41,26 @@ namespace RK_game_2023
             panels.Add(cryptoPanel);
             panels.Add(mapPanel);
 
+            btn_GoLeftSubtree.Visible = false;
+            btn_GoRightSubtree.Visible = false;
+            luckLabel.Visible = false;
+            YouGot.Visible = false;
             graphTravelButtons = new List<Button>();
-            graphTravelButtons.Add(btn_travel1);
-            graphTravelButtons.Add(btn_travel2);
-            graphTravelButtons.Add(btn_travel3);
-            graphTravelButtons.Add(btn_travel4);
-            btn_travel1.Click += new System.EventHandler(this.OnClickTravelOne);
-            btn_travel2.Click += new System.EventHandler(this.OnClickTravelTwo);
-            btn_travel3.Click += new System.EventHandler(this.OnClickTravelThree);
-            btn_travel4.Click += new System.EventHandler(this.OnClickTravelFour);
-            travelCostLabel = new List<Label>() { costLabel1 , costLabel2, costLabel3, costLabel4};
+            graphTravelButtons.Add(btn_travel);
+            graphTravelButtons.Add(btn_travel_prev);
+            graphTravelButtons.Add(btn_travel_next);
+
+
+
+
+            lab_treenode_left.Text = "";
+            lab_treenode_self.Text = "";
+            lab_treenode_right.Text = "";
+
+            btn_travel.Click += new System.EventHandler(this.OnClickTravel);
+            btn_travel_prev.Click += new System.EventHandler(this.OnClickTravelPrev);
+            btn_travel_next.Click += new System.EventHandler(this.OnClickTravelNext);
+
         }
 
         public void SwitchPanel(GameState b)
@@ -105,15 +114,14 @@ namespace RK_game_2023
         }
 
 
-        enum ListSortingType
+        public enum ListSortingType
         {
             Name,
             Value,
-            Decrease,
-            Increase,
+            Change,
         }
 
-        enum ListSortOrde
+        public enum ListSortOrder
         {
             Ascending,
             Descending
@@ -122,33 +130,29 @@ namespace RK_game_2023
 
         private void HandleMap()
         {
-            if (gameref.currentGraphNode == null)
+            label2.Text = "Travel Options";
+            if (GameData.currentGraphNode == null)
             {
+                System.Diagnostics.Debug.WriteLine("Cannot HandleMap, current graphnode null.");
                 label_playerGraphLocation.Text = "";
-            }else label_playerGraphLocation.Text = "Node " + gameref.currentGraphNode.Identification.ToString();
-
-            for (int i = 0; i < graphTravelButtons.Count; i++)
-            {
-                graphTravelButtons[i].Enabled = travelCostLabel[i].Enabled = false;
-
+                return;
             }
-            travelPoints = new List<GraphEdge>(gameref.currentGraphNode.Edges.Count);
-            
-            for (int i = 0; i < gameref.currentGraphNode.Edges.Count; i++)
-            {
-                graphTravelButtons[i].Enabled = travelCostLabel[i].Enabled = true;
-                travelCostLabel[i].Text = travelPoints[i].Weight.ToString();
-                graphTravelButtons[i].Text = travelPoints[i]._B.Identification.ToString() + " to " + travelPoints[i]._A.Identification.ToString();
-            }
+            label_playerGraphLocation.Text = "Node " + GameData.currentGraphNode.Identification.ToString();
 
-            rtf_Graph.Text = gameref.currentGraphNode.GetGraphMatrix();
+         
+            rtf_Graph.Text = GameData.nodes.ToString();
+           
+
         }
+
+
+       
 
         private void SetupGameLogic()
         {
-            gameref = new Game();
+            GameData = new Game();
 
-            gameref.GameLoop(this);
+            GameData.GameLoop(this);
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -159,17 +163,143 @@ namespace RK_game_2023
 
             timer1.Start();
         }
-        public void UpdateCryptoInventory(List<string> CryptoList)
+
+
+
+        class ListBoxCoinEntry
         {
-            Wallet.ChangePrices();
-            System.Diagnostics.Debug.WriteLine("UpdateCryptoInventory just ran as part of the periodic loop in Game.");
+            public string name;
+            public float owned;
+            public float price;
+            public float lastChange;
+            public Currency reference;
+
+        }
+        public ListSortingType sortType;
+        public ListSortOrder sortOrder;
+        public void UpdateMineDisplay()
+        {
+            if (GameData.currentGraphNode.Shaft.Left != null)
+            {
+                lab_treenode_left.Text = "Shaft " + GameData.currentGraphNode.Shaft.Left.id;
+            }
+                lab_treenode_self.Text = "Shaft " + GameData.currentGraphNode.Shaft.id;
+            if (GameData.currentGraphNode.Shaft.Right != null)
+            {
+                lab_treenode_right.Text = "Shaft " + GameData.currentGraphNode.Shaft.Right.id;
+            }
+
+           
+            switch (GameData.currentGraphNode.Shaft.yieldQuality)
+            {
+                case YieldValue.Intact:
+                    img_Currnode.Image = Resource1.freshNode;
+                    break;
+                case YieldValue.Low:
+                    img_Currnode.Image = Resource1.lowNode;
+                    break;
+                case YieldValue.Depleted:
+                    img_Currnode.Image = Resource1.depletedNode;
+                    break;
+                default:
+                    break;
+            }
+            if (GameData.currentGraphNode.Shaft.Left != null)
+            {
+                switch (GameData.currentGraphNode.Shaft.Left.yieldQuality)
+                {
+                    case YieldValue.Intact:
+                        img_Leftnode.Image = Resource1.freshNode;
+                        break;
+                    case YieldValue.Low:
+                        img_Leftnode.Image = Resource1.lowNode;
+                        break;
+                    case YieldValue.Depleted:
+                        img_Leftnode.Image = Resource1.depletedNode;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                img_Leftnode.Image = Resource1.unknownNode;
+            }
+            if (GameData.currentGraphNode.Shaft.Right != null)
+            {
+                switch (GameData.currentGraphNode.Shaft.Right.yieldQuality)
+                {
+                    case YieldValue.Intact:
+                        img_Rightnode.Image = Resource1.freshNode;
+                        break;
+                    case YieldValue.Low:
+                        img_Rightnode.Image = Resource1.lowNode;
+                        break;
+                    case YieldValue.Depleted:
+                        img_Rightnode.Image = Resource1.depletedNode;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                img_Rightnode.Image = Resource1.unknownNode;
+            }
+        }
+
+
+        private List<ListBoxCoinEntry> ConvertToListBox(Dictionary<string, Currency> dic)
+        {
+
+            List<ListBoxCoinEntry> b = new List<ListBoxCoinEntry>();
+            foreach (KeyValuePair<string, Currency> item in dic)
+            {
+                ListBoxCoinEntry a = new ListBoxCoinEntry();
+
+                a.name = item.Value.GetName();
+                a.owned = item.Value.GetAmt();
+                a.price = item.Value.GetValue();
+                a.lastChange = item.Value.lastValueChange;
+                a.reference = item.Value;
+                b.Add(a);
+
+            }
+
+
+            
+
+
+
+
+
+
+            return b;
+        }
+
+
+
+        public void UpdateCryptoWalletDisplay()
+        {
+            List<ListBoxCoinEntry> b = ConvertToListBox(Wallet.content).OrderByDescending(x => x.owned).ToList();
+            List<string> cryptoList = new List<string>();
+            foreach (var item in b)
+            {
+                //throw new Exception(item.name);
+
+                string newEntry = item.name +"  "+ item.owned +"  " + item.price;
+
+                cryptoList.Add(newEntry);
+            }
+
+            // System.Diagnostics.Debug.WriteLine("UpdateCryptoInventory just ran as part of the periodic loop in Game.");
             // Running on the worker thread
             //this is synchronous btw
             this.SuspendLayout();
             this.listBox1.Invoke((MethodInvoker)delegate
             {
                 listBox1.Items.Clear();
-                foreach (string item in CryptoList)
+                foreach (string item in cryptoList)
                 {
                     listBox1.Items.Add(item);
                 }
@@ -177,14 +307,16 @@ namespace RK_game_2023
             this.ResumeLayout();
             // Back on the worker thread
 
-            HandleCrypto();
         }
         private void TimerTick(object sender, EventArgs e)
         {
-
-            UpdateCryptoInventory(gameref.GetCryptoUpdate());
+            Wallet.ChangePrices();
+            label_MUD.Text = Wallet.MUD.ToString();
+            UpdateMineDisplay();
+            UpdateCryptoMarketDisplay();
+            UpdateCryptoWalletDisplay();
             timeLabel.Text = DateTime.Now.ToString("h:mm:ss tt");
-            switch (gameref._currentScreenState)
+            switch (GameData._currentScreenState)
             {
                 case GameState.Mine:
                     if (mining)
@@ -196,7 +328,8 @@ namespace RK_game_2023
                     HandleMap();
                     break;
                 case GameState.Crypto:
-                    HandleCrypto();
+                    //HandleCrypto();
+
                     break;
                 default:
                     break;
@@ -209,21 +342,76 @@ namespace RK_game_2023
 
 
 
-        private void HandleCrypto()
+        private void ToggleSortType(ListSortingType b)
         {
+            sortType = b;
+        }
+
+
+
+        private void UpdateCryptoMarketDisplay()
+        {
+
+            List<ListBoxCoinEntry> b = ConvertToListBox(Wallet.content);
+            switch (sortType)
+            {
+                case ListSortingType.Name:
+                    switch (sortOrder)
+                    {
+                        case ListSortOrder.Ascending:
+                            b = b.OrderBy(x => x.name).ToList();
+                            break;
+                        case ListSortOrder.Descending:
+                            b = b.OrderByDescending(x => x.name).ToList();
+                            break;
+                    }
+                    break;
+                case ListSortingType.Value:
+                    switch (sortOrder)
+                    {
+                        case ListSortOrder.Ascending:
+                            b = b.OrderBy(x => x.price).ToList();
+                            break;
+                        case ListSortOrder.Descending:
+                            b = b.OrderByDescending(x => x.price).ToList();
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                
+                case ListSortingType.Change:
+                    switch (sortOrder)
+                    {
+                        case ListSortOrder.Ascending:
+                            b = b.OrderBy(x => x.lastChange).ToList();
+                            break;
+                        case ListSortOrder.Descending:
+                            b = b.OrderByDescending(x => x.lastChange).ToList();
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                default:
+                    break;
+            }
+           
 
 
             List<string> cryptoList = new List<string>();
-            foreach (KeyValuePair<string, Currency> item in Wallet.content)
+            foreach (var item in b)
             {
+                //throw new Exception(item.name);
+                string newEntry = item.name + "     " + item.price + "    " + item.lastChange;
 
-                Currency coin = item.Value;
-                string newEntry = item.Key+" - "+ coin.GetValue() + "" + coin.lastValueChange;
                 cryptoList.Add(newEntry);
-
             }
 
-            System.Diagnostics.Debug.WriteLine("UpdateCryptoInventory just ran as part of the periodic loop in Game.");
+
+
+
+
             // Running on the worker thread
             //this is synchronous btw
             this.SuspendLayout();
@@ -242,37 +430,53 @@ namespace RK_game_2023
 
         private void List_crypto_coins_SelectedIndexChanged(object sender, EventArgs e)
         {
-
-
-            string firstThreeLetters = list_crypto_coins.SelectedItem.ToString().Substring(0, 4);
-            //throw new Exception(list_crypto_coins.SelectedItem.ToString().Substring(0, 4));
-            gameref.currentCurrency = Wallet.content.Where(z => z.Value.GetName() == firstThreeLetters).FirstOrDefault().Value;
-
-
-            rtf_crypto_description.Text = gameref.currentCurrency.GetName() + " - " + gameref.currentCurrency.GetValue();
-
+            if (list_crypto_coins.SelectedItem == null)
+            {
+                return;
+            }
+            GameData.currentCurrency = GetCurrencyFromSelectedIndex(list_crypto_coins.SelectedItem.ToString().Substring(0, 4));
+            rtf_crypto_description.Text = GameData.currentCurrency.GetName() + " - " + GameData.currentCurrency.GetValue();
         }
 
-
+        private Currency GetCurrencyFromSelectedIndex(string firstThreeLetters)
+        {
+            return GameData.currentCurrency = Wallet.content.Where(z => z.Value.GetName() == firstThreeLetters).FirstOrDefault().Value;
+        }
 
         Tuple<Currency, float, YieldValue, bool> lastResult;
+        private int miningInterval = 0;
         private void HandleMining()
         {
-            luckLabelText.Visible = false;
-
-
-            progressBar1.Value = progressBar1.Value + 1;
-            if (progressBar1.Value > 3)
+            System.Diagnostics.Debug.WriteLine("just got another HandleMining tick.");
+            miningInterval++;
+            countdown.Text = miningInterval.ToString();
+            if (miningInterval < 4)
             {
-                lastResult = gameref.GetMineResult();
-                luckLabelText.Visible = true;
-                luckLabelText.Text = "You just found " + lastResult.Item2.ToString() + " " + lastResult.Item1.GetName();
+                return;
             }
+            miningInterval = 0;
+
+            YouGot.Visible = false;
+            System.Diagnostics.Debug.WriteLine("@HandleMining did a tick");
+            lastResult = GameData.GetMineResult();
+            GameData.GainCurrency(lastResult.Item1, lastResult.Item2);
+            YouGot.Visible = true;
+            YouGot.Text = "You got " + lastResult.Item2.ToString() + " " + lastResult.Item1.GetName();
             luckLabel.Visible = lastResult.Item4;
-            luckLabelText.Visible = lastResult.Item4;
+            countdown.Text = miningInterval.ToString();
+            RefreshMineInfo();
+        }
+
+        private void RefreshMineInfo()
+        {
+            currPrimaryLabel.Text = GameData.currentGraphNode.Shaft.primary.GetName();
+            currSecondaryLabel.Text = GameData.currentGraphNode.Shaft.secondary.GetName();
+            lab_AvgYield.Text = "Coins in shaft node: " +GameData.currentGraphNode.Shaft.yield.ToString();
         }
         private void SwitchVisibility(GameState newState = GameState.Undefined)
         {
+            mining = false;
+            GameData._currentScreenState = newState;
             switch (newState)
             {
                 case GameState.Mine:
@@ -280,10 +484,12 @@ namespace RK_game_2023
                     {
                         item.Visible = false;
                         item.Enabled = false;
-                    }
+                    } 
                     minePanel.Visible = true;
                     minePanel.Enabled = true;
-                    RefreshInfo(gameref.blurb_Mine, gameref.tip_Mine);
+                    RefreshInfo(GameData.blurb_Mine, GameData.tip_Mine);
+                    RefreshMineInfo();
+                   
                     break;
                 case GameState.Map:
                     foreach (Panel item in panels)
@@ -293,7 +499,8 @@ namespace RK_game_2023
                     }
                     mapPanel.Visible = true;
                     mapPanel.Enabled = true;
-                    RefreshInfo(gameref.blurb_Map, gameref.tip_Map);
+                    RefreshInfo(GameData.blurb_Map, GameData.tip_Map);
+                    HandleMap();
                     break;
                 case GameState.Help:
                     foreach (Panel item in panels)
@@ -313,8 +520,9 @@ namespace RK_game_2023
                     }
                     cryptoPanel.Visible = true;
                     cryptoPanel.Enabled = true;
-                    
-                    RefreshInfo(gameref.blurb_Crypto, gameref.tip_Crypto);
+            UpdateCryptoMarketDisplay();
+
+                    RefreshInfo(GameData.blurb_Crypto, GameData.tip_Crypto);
                     break;
                 default:
                     SwitchVisibility(GameState.Menu);
@@ -328,17 +536,51 @@ namespace RK_game_2023
 
 
 
-        public void OnClickTravelOne(object sender, EventArgs e)
+        public void OnClickTravel(object sender, EventArgs e)
         {
-            OnClickTravel(0);
+           
+            if (Wallet.MUD >= GameData.currentlySelectedTravelGraph.Weight)
+            {
+                Wallet.MUD -= GameData.currentlySelectedTravelGraph.Weight;
+
+                GameData.MoveOnGraphMap(GameData.currentlySelectedTravelGraph);
+
+
+
+            }
+            else
+            {
+                label2.Text = "Not enough MUD.";
+            }
+
+            label_playerGraphLocation.Text = "Node " + GameData.currentGraphNode.Identification.ToString();
         }
-        public void OnClickTravelTwo(object sender, EventArgs e)
+        public int travelIndex = 0;
+        public void OnClickTravelPrev(object sender, EventArgs e)
         {
-            OnClickTravel(1);
+            travelIndex--;
+            FinalizeTravel();
         }
-        public void OnClickTravelThree(object sender, EventArgs e)
+
+
+        private void FinalizeTravel()
         {
-            OnClickTravel(2);
+            if (travelIndex < 0)
+            {
+                travelIndex = 0;
+            }
+            if (travelIndex >= GameData.currentGraphNode.Edges.Count)
+            {
+                travelIndex =  GameData.currentGraphNode.Edges.Count-1;
+            }
+            GameData.currentlySelectedTravelGraph = GameData.currentGraphNode.Edges[travelIndex];
+            btn_travel.Text = GameData.currentlySelectedTravelGraph._name;
+        }
+        public void OnClickTravelNext(object sender, EventArgs e)
+        {
+            travelIndex++;
+
+            FinalizeTravel();
         }
         public void OnClickTravelFour(object sender, EventArgs e)
         {
@@ -347,46 +589,42 @@ namespace RK_game_2023
 
         public void OnClickTravel(int i)
         {
-            if (travelPoints[i] == null)
+            GraphEdge targetEdge = GameData.currentGraphNode.Edges[i];
+            if (Wallet.MUD >= targetEdge.Weight)
             {
-                throw new Exception("Null Exception Error @ OnClickTravel - could not find the targeted graph edge.");
-            }
-            GraphEdge b = travelPoints[i];
-            if (Wallet.MUD >= b.Weight)
-            {
-                Wallet.MUD -= b.Weight;
-                GraphNode other = travelPoints[i].getOther(gameref.currentGraphNode);
-                gameref.MoveOnGraphMap(b);
+                Wallet.MUD -= targetEdge.Weight;
+               
+                GameData.MoveOnGraphMap(targetEdge);
               
                
 
             }
             else
             {
-                //make funny noise
+                label2.Text = "Not enough MUD.";
             }
+
+            label_playerGraphLocation.Text = "Node " + GameData.currentGraphNode.Identification.ToString();
         }
 
 
 
-       
 
 
 
-       
 
 
-      
-
-      
 
 
-        public void InputPressEnter(object sender, KeyEventArgs e)
+        public void ShopInputError(string b)
         {
-            if (e.KeyCode == Keys.Enter)
-                gameref.ProcessInput(inputBox.Text);
+            rtf_crypto_description.Text = b ;
         }
 
+
+
+
+        
 
 
         private void cryptolistContextMenuStripChanged(object sender, EventArgs e)
@@ -438,10 +676,11 @@ namespace RK_game_2023
 
         private void btn_AdvanceDrill_Click(object sender, EventArgs e)
         {
+           
+           
             if (mining)
             {
-                mining = false;
-                btn_AdvanceDrill.Text = "Engage Drill";
+                btn_AdvanceDrill.Text = "Activate Drill";
 
                 btn_GoLeftSubtree.Visible = true;
                 btn_GoRightSubtree.Visible = true;
@@ -449,24 +688,82 @@ namespace RK_game_2023
             else
             {
                 btn_AdvanceDrill.Text = "Retract Drill";
-                mining = true;
                 btn_GoLeftSubtree.Visible = false;
-                btn_GoRightSubtree.Visible = false;
+                btn_GoRightSubtree.Visible = false ;
             }
-
+            mining = !mining;
+            RefreshMineInfo();
         }
 
-        private void btn_TreeData_Click(object sender, EventArgs e)
-        {
-
-            rtfbox_TreeData.Text = gameref.GetTreeData();
-
-        }
+       
 
 
 
         #endregion
 
-       
+        
+
+        
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            if (sortOrder == ListSortOrder.Ascending)
+            {
+                sortOrder = ListSortOrder.Descending;
+                asc.Text = "Desc";
+            }
+            else
+            if (sortOrder == ListSortOrder.Descending)
+            {
+                sortOrder = ListSortOrder.Ascending;
+                asc.Text = "Asc";
+            }
+            UpdateCryptoMarketDisplay();
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            ToggleSortType(ListSortingType.Name);
+            UpdateCryptoMarketDisplay();
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            ToggleSortType(ListSortingType.Value);
+            UpdateCryptoMarketDisplay();
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            ToggleSortType(ListSortingType.Change);
+            UpdateCryptoMarketDisplay();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {//buy
+
+            float b = float.Parse(inputBox.Text);
+            GameData.ProcessInput(b, true);
+            inputBox.Text = "";
+        }
+
+        private void button6_Click_1(object sender, EventArgs e)
+        {//sell
+
+           float b = float.Parse(inputBox.Text);
+            GameData.ProcessInput(b, false);
+            inputBox.Text = "";
+          
+        }
+
+        private void btn_GoRightSubtree_Click(object sender, EventArgs e)
+        {
+            GameData.MoveOnTree(false); RefreshMineInfo();
+        }
+
+        private void btn_GoLeftSubtree_Click(object sender, EventArgs e)
+        {
+            GameData.MoveOnTree(true); RefreshMineInfo();
+        }
     }
 }

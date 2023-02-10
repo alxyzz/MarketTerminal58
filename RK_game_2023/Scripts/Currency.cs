@@ -11,19 +11,37 @@ namespace RK_game_2023
     public static class Wallet
     {
         public static float MUD; //Mongolian Uranium Dollars, the global currency in the current year, uranium having replaced petroleum as the most valuable and commonly used energy source. this is used as the basic value of any other coin...
-        public static Dictionary<string, Currency> content;
+        public static Dictionary<string, Currency> content = new Dictionary<string, Currency>();
 
-        public static string Change(string coin, float q)
+
+
+
+
+
+        public static void Transaction(float price, Currency cgained, float cAmt)
         {
-           Currency b;
-            if (content.TryGetValue(coin, out b))
+            MUD += price;
+            content[cgained.GetName()].ChangeQuantity(cAmt); 
+        }
+
+
+
+
+
+
+
+        public static string ModifyAmount(string coin, float q)
+        {
+            try
             {
-                b.Change(q);
+                content[coin].ChangeQuantity(q);
+
                 return coin + "- [" + q + " ]";
             }
-            else
+            catch (Exception)
             {
-                return "Error - invalid coin";
+
+                return "Error. Coin does not exist";
             }
         }
 
@@ -55,13 +73,17 @@ namespace RK_game_2023
             content = new Dictionary<string, Currency>();
             for (int i = 0; i < Presets.currAmt; i++)
             {
-                Currency c = new Currency(Scripts.HelperMethods.RandomString(4), Scripts.HelperMethods.NextFloat(Scripts.HelperMethods.RandomSeeder.rnd, 0.5f, 5f), Scripts.HelperMethods.RandomSeeder.rnd.Next(1, 100), Scripts.HelperMethods.NextFloat(Scripts.HelperMethods.RandomSeeder.rnd, 0.1f, 2f));
+
+                
+                string newname = Scripts.HelperMethods.RandomString(Presets.coinNameLength);
+                System.Diagnostics.Debug.WriteLine("Generated new coin" + newname);
+                Currency c = new Currency(newname, Scripts.HelperMethods.NextFloat(Scripts.HelperMethods.RandomSeeder.rnd, 0.5f, 5f), Scripts.HelperMethods.RandomSeeder.rnd.Next(1, 100), Scripts.HelperMethods.NextFloat(Scripts.HelperMethods.RandomSeeder.rnd, 0.1f, 0.5f));
                 content.Add(c.GetName(), c);
             }
         }
        
 
-    }
+    }   
 
 
 
@@ -77,7 +99,7 @@ namespace RK_game_2023
 
         private string id;
         private float value;
-        private float amount;
+        private float amount  = 0;
         public float lastValueChange;
         private int volatility; //1-100
         private float maxValueChange;
@@ -96,7 +118,12 @@ namespace RK_game_2023
             return amount;
         }
 
-        public void Change(float q)
+        public void ChangeQuantity(float q)
+        {
+            amount += q;
+        }
+
+        public void ChangeValue(float q)
         {
             value += q;
         }
@@ -116,7 +143,9 @@ namespace RK_game_2023
             {
                 lastValueChange = Scripts.HelperMethods.NextFloat(Scripts.HelperMethods.RandomSeeder.rnd, -maxValueChange, maxValueChange);
                
-                value += lastValueChange;
+                value = value+lastValueChange > 0.1f ? value + lastValueChange : 0.1f;
+
+
             }
 
         }

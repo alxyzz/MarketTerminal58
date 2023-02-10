@@ -69,10 +69,7 @@
     <Compile Include="Screens\Scene.cs" />
     <Compile Include="Scripts\Currency.cs" />
     <Compile Include="DataStructures\Graph.cs" />
-    <Compile Include="Scripts\graph_MapGenerator.cs" />
-    <Compile Include="Scripts\list_sortable_CryptoHandler.cs" />
     <Compile Include="DataStructures\Tree.cs" />
-    <Compile Include="Scripts\tree_ShaftGenerator.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -116,6 +113,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\unknownNode.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\branch.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
