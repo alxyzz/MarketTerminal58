@@ -219,6 +219,7 @@ namespace RK_game_2023
             this.inputBox.Name = "inputBox";
             this.inputBox.Size = new System.Drawing.Size(94, 20);
             this.inputBox.TabIndex = 5;
+            this.inputBox.TextChanged += new System.EventHandler(this.inputBox_TextChanged);
             // 
             // btn_Mine
             // 

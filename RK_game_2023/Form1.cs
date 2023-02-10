@@ -741,7 +741,10 @@ namespace RK_game_2023
 
         private void button2_Click(object sender, EventArgs e)
         {//buy
-
+            if (string.IsNullOrEmpty(inputBox.Text))
+            {
+                return;
+            }
             float b = float.Parse(inputBox.Text);
             GameData.ProcessInput(b, true);
             inputBox.Text = "";
@@ -749,7 +752,10 @@ namespace RK_game_2023
 
         private void button6_Click_1(object sender, EventArgs e)
         {//sell
-
+            if (string.IsNullOrEmpty(inputBox.Text))
+            {
+                return;
+            }
            float b = float.Parse(inputBox.Text);
             GameData.ProcessInput(b, false);
             inputBox.Text = "";
@@ -764,6 +770,11 @@ namespace RK_game_2023
         private void btn_GoLeftSubtree_Click(object sender, EventArgs e)
         {
             GameData.MoveOnTree(true); RefreshMineInfo();
+        }
+
+        private void inputBox_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
